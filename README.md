@@ -222,5 +222,5 @@ This project is open-sourced software licensed under the [MIT license](https://o
 ---
 
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/your-username">Your Name</a>
+  Made with ❤️ by <a href="https://github.com/humdiess">Humdiess</a>
 </p>
