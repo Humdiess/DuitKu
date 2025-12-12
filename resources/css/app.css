@@ -179,6 +179,10 @@ body {
     color: var(--text-primary);
     font-size: 1rem;
     transition: all 0.2s ease;
+    /* Reset for select */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }
 
 .input-ios:focus {
@@ -189,6 +193,94 @@ body {
 
 .input-ios::placeholder {
     color: var(--text-tertiary);
+}
+
+/* Select specific styling */
+select.input-ios {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(255,255,255,0.5)' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.25rem;
+    padding-right: 2.5rem;
+}
+
+[data-theme="light"] select.input-ios {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(0,0,0,0.5)' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+}
+
+/* Style native select options */
+select.input-ios option {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+}
+
+[data-theme="dark"] select.input-ios option {
+    background: #1c1c1e;
+    color: #ffffff;
+}
+
+[data-theme="light"] select.input-ios option {
+    background: #ffffff;
+    color: #000000;
+}
+
+/* Date input specific */
+input[type="date"].input-ios {
+    color-scheme: dark;
+}
+
+[data-theme="light"] input[type="date"].input-ios {
+    color-scheme: light;
+}
+
+/* Number input */
+input[type="number"].input-ios {
+    -moz-appearance: textfield;
+}
+
+input[type="number"].input-ios::-webkit-outer-spin-button,
+input[type="number"].input-ios::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Textarea */
+textarea.input-ios {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Range input */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: var(--fill-primary);
+    border-radius: 3px;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
 }
 
 /* iOS Navbar */

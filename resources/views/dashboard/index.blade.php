@@ -18,8 +18,14 @@
                 </div>
                 <span class="text-ios-caption text-tertiary-ios">Pemasukan</span>
             </div>
-            <p class="text-2xl font-semibold text-green-ios">Rp 12.500.000</p>
-            <p class="text-ios-caption text-tertiary-ios mt-1">+15% dari bulan lalu</p>
+            <p class="text-2xl font-semibold text-green-ios">Rp {{ number_format($stats['income'] ?? 0, 0, ',', '.') }}</p>
+            <p class="text-ios-caption text-tertiary-ios mt-1">
+                @if(($stats['income_change'] ?? 0) >= 0)
+                    +{{ $stats['income_change'] ?? 0 }}% dari bulan lalu
+                @else
+                    {{ $stats['income_change'] ?? 0 }}% dari bulan lalu
+                @endif
+            </p>
         </div>
 
         <div class="glass p-4 fade-in-ios" style="animation-delay: 0.1s">
@@ -31,8 +37,14 @@
                 </div>
                 <span class="text-ios-caption text-tertiary-ios">Pengeluaran</span>
             </div>
-            <p class="text-2xl font-semibold text-red-ios">Rp 3.250.000</p>
-            <p class="text-ios-caption text-tertiary-ios mt-1">-8% dari bulan lalu</p>
+            <p class="text-2xl font-semibold text-red-ios">Rp {{ number_format($stats['expense'] ?? 0, 0, ',', '.') }}</p>
+            <p class="text-ios-caption text-tertiary-ios mt-1">
+                @if(($stats['expense_change'] ?? 0) <= 0)
+                    {{ $stats['expense_change'] ?? 0 }}% dari bulan lalu
+                @else
+                    +{{ $stats['expense_change'] ?? 0 }}% dari bulan lalu
+                @endif
+            </p>
         </div>
 
         <div class="glass p-4 fade-in-ios" style="animation-delay: 0.15s">
@@ -44,7 +56,7 @@
                 </div>
                 <span class="text-ios-caption text-tertiary-ios">Saldo</span>
             </div>
-            <p class="text-2xl font-semibold text-primary-ios">Rp 9.250.000</p>
+            <p class="text-2xl font-semibold {{ ($stats['balance'] ?? 0) >= 0 ? 'text-primary-ios' : 'text-red-ios' }}">Rp {{ number_format($stats['balance'] ?? 0, 0, ',', '.') }}</p>
             <p class="text-ios-caption text-tertiary-ios mt-1">Total tersedia</p>
         </div>
 
@@ -57,7 +69,7 @@
                 </div>
                 <span class="text-ios-caption text-tertiary-ios">Transaksi</span>
             </div>
-            <p class="text-2xl font-semibold text-primary-ios">42</p>
+            <p class="text-2xl font-semibold text-primary-ios">{{ $stats['count'] ?? 0 }}</p>
             <p class="text-ios-caption text-tertiary-ios mt-1">Bulan ini</p>
         </div>
     </div>
@@ -70,23 +82,43 @@
             <div class="glass glass-static p-4 fade-in-ios" style="animation-delay: 0.25s">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-ios-headline text-primary-ios">Grafik Keuangan</h2>
-                    <select class="input-ios w-auto text-sm py-1.5">
-                        <option>7 Hari</option>
-                        <option>30 Hari</option>
-                        <option>3 Bulan</option>
+                    <select class="input-ios w-auto text-sm py-1.5" id="chart-period">
+                        <option value="7">7 Hari</option>
+                        <option value="30">30 Hari</option>
                     </select>
                 </div>
-                <div class="h-48 flex items-end justify-around gap-2">
+                <div class="h-48 flex items-end justify-around gap-1 pt-4">
                     @php
-                    $chartData = [40, 65, 45, 80, 55, 90, 70];
-                    $days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+                        $hasData = false;
+                        $maxValue = 1;
+                        if (!empty($chartData['data'])) {
+                            foreach ($chartData['data'] as $d) {
+                                if ($d['income'] > 0 || $d['expense'] > 0) $hasData = true;
+                            }
+                            $maxValue = max(1, max(array_map(fn($d) => max($d['income'] ?? 0, $d['expense'] ?? 0), $chartData['data'])));
+                        }
                     @endphp
-                    @foreach($chartData as $i => $height)
-                    <div class="flex-1 flex flex-col items-center gap-2">
-                        <div class="w-full max-w-8 rounded-t bg-gradient-to-t from-blue-500/30 to-purple-500/50 transition-all hover:from-blue-500/50 hover:to-purple-500/70" style="height: {{ $height }}%"></div>
-                        <span class="text-xs text-tertiary-ios">{{ $days[$i] }}</span>
+                    @if($hasData && !empty($chartData['data']))
+                        @foreach($chartData['data'] as $day)
+                        @php
+                            $total = ($day['income'] ?? 0) + ($day['expense'] ?? 0);
+                            $barHeight = max(($total / $maxValue) * 140, 8);
+                        @endphp
+                        <div class="flex-1 flex flex-col items-center gap-1 min-w-0">
+                            <div class="w-full max-w-6 rounded-t-md bg-gradient-to-t from-blue-500 to-purple-500 transition-all hover:from-blue-400 hover:to-purple-400" style="height: {{ $barHeight }}px;"></div>
+                            <span class="text-[10px] text-tertiary-ios whitespace-nowrap">{{ $day['label'] }}</span>
+                        </div>
+                        @endforeach
+                    @else
+                    <div class="flex-1 flex items-center justify-center text-tertiary-ios">
+                        <div class="text-center py-8">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <p class="text-ios-caption">Belum ada data transaksi</p>
+                        </div>
                     </div>
-                    @endforeach
+                    @endif
                 </div>
             </div>
 
@@ -94,18 +126,10 @@
             <div class="glass glass-static p-4 fade-in-ios" style="animation-delay: 0.3s">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-ios-headline text-primary-ios">Transaksi Terbaru</h2>
-                    <a href="{{ route('transaksi') }}" class="text-ios-caption text-accent-ios">Lihat Semua</a>
+                    <a href="{{ route('transaksi.index') }}" class="text-ios-caption text-accent-ios">Lihat Semua</a>
                 </div>
                 <div class="space-y-3">
-                    @php
-                    $transactions = [
-                        ['icon' => '💰', 'name' => 'Gaji Bulanan', 'date' => 'Hari ini', 'amount' => 10000000, 'type' => 'income'],
-                        ['icon' => '🍔', 'name' => 'Makan Siang', 'date' => 'Kemarin', 'amount' => 45000, 'type' => 'expense'],
-                        ['icon' => '🚗', 'name' => 'Gopay Transport', 'date' => 'Kemarin', 'amount' => 75000, 'type' => 'expense'],
-                        ['icon' => '🛒', 'name' => 'Belanja Groceries', 'date' => '2 hari lalu', 'amount' => 350000, 'type' => 'expense'],
-                    ];
-                    @endphp
-                    @foreach($transactions as $tx)
+                    @forelse($recentTransactions ?? [] as $tx)
                     <div class="flex items-center gap-3 p-2 -mx-2 rounded-xl hover:bg-[var(--fill-primary)] transition-colors">
                         <div class="w-10 h-10 rounded-xl bg-[var(--fill-primary)] flex items-center justify-center text-lg">
                             {{ $tx['icon'] }}
@@ -115,10 +139,15 @@
                             <p class="text-ios-caption text-tertiary-ios">{{ $tx['date'] }}</p>
                         </div>
                         <p class="text-ios-body font-medium {{ $tx['type'] === 'income' ? 'text-green-ios' : 'text-red-ios' }}">
-                            {{ $tx['type'] === 'income' ? '+' : '-' }}Rp {{ number_format($tx['amount'], 0, ',', '.') }}
+                            {{ $tx['formatted_amount'] }}
                         </p>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="text-center py-6">
+                        <p class="text-ios-caption text-tertiary-ios">Belum ada transaksi</p>
+                        <a href="{{ route('transaksi.index') }}" class="text-ios-caption text-accent-ios">Tambah transaksi pertama</a>
+                    </div>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -129,7 +158,7 @@
             <div class="glass glass-static p-4 fade-in-ios" style="animation-delay: 0.35s">
                 <h2 class="text-ios-headline text-primary-ios mb-4">Aksi Cepat</h2>
                 <div class="grid grid-cols-2 gap-3">
-                    <a href="{{ route('transaksi') }}" onclick="event.preventDefault(); openModal('quick-income')" class="glass glass-static p-3 rounded-xl text-center hover:bg-[var(--glass-bg-heavy)] transition-colors">
+                    <a href="{{ route('transaksi.index') }}" onclick="event.preventDefault(); openModal('quick-income')" class="glass glass-static p-3 rounded-xl text-center hover:bg-[var(--glass-bg-heavy)] transition-colors">
                         <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-green-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-ios" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -137,7 +166,7 @@
                         </div>
                         <span class="text-ios-caption text-primary-ios">Pemasukan</span>
                     </a>
-                    <a href="{{ route('transaksi') }}" onclick="event.preventDefault(); openModal('quick-expense')" class="glass glass-static p-3 rounded-xl text-center hover:bg-[var(--glass-bg-heavy)] transition-colors">
+                    <a href="{{ route('transaksi.index') }}" onclick="event.preventDefault(); openModal('quick-expense')" class="glass glass-static p-3 rounded-xl text-center hover:bg-[var(--glass-bg-heavy)] transition-colors">
                         <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-red-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-ios" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
@@ -145,7 +174,7 @@
                         </div>
                         <span class="text-ios-caption text-primary-ios">Pengeluaran</span>
                     </a>
-                    <a href="{{ route('budget') }}" class="glass glass-static p-3 rounded-xl text-center hover:bg-[var(--glass-bg-heavy)] transition-colors">
+                    <a href="{{ route('budget.index') }}" class="glass glass-static p-3 rounded-xl text-center hover:bg-[var(--glass-bg-heavy)] transition-colors">
                         <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-blue-500/20 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent-ios" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -168,28 +197,26 @@
             <div class="glass glass-static p-4 fade-in-ios" style="animation-delay: 0.4s">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-ios-headline text-primary-ios">Budget Bulan Ini</h2>
-                    <a href="{{ route('budget') }}" class="text-ios-caption text-accent-ios">Detail</a>
+                    <a href="{{ route('budget.index') }}" class="text-ios-caption text-accent-ios">Detail</a>
                 </div>
                 <div class="space-y-4">
-                    @php
-                    $budgets = [
-                        ['icon' => '🍔', 'name' => 'Makanan', 'spent' => 850, 'total' => 2000, 'color' => 'from-orange-500 to-red-500'],
-                        ['icon' => '🚗', 'name' => 'Transport', 'spent' => 450, 'total' => 1000, 'color' => 'from-blue-500 to-cyan-500'],
-                        ['icon' => '🛒', 'name' => 'Belanja', 'spent' => 500, 'total' => 1500, 'color' => 'from-pink-500 to-rose-500'],
-                    ];
-                    @endphp
-                    @foreach($budgets as $b)
-                    @php $pct = ($b['spent'] / $b['total']) * 100; @endphp
+                    @forelse($budgetOverview ?? [] as $b)
+                    @php $pct = $b['percentage']; @endphp
                     <div>
                         <div class="flex items-center justify-between mb-1.5">
                             <span class="text-ios-body text-primary-ios">{{ $b['icon'] }} {{ $b['name'] }}</span>
                             <span class="text-ios-caption text-tertiary-ios">{{ number_format($pct, 0) }}%</span>
                         </div>
                         <div class="h-1.5 rounded-full bg-[var(--fill-primary)] overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r {{ $b['color'] }}" style="width: {{ $pct }}%"></div>
+                            <div class="h-full rounded-full bg-gradient-to-r {{ $b['color'] }}" style="width: {{ min($pct, 100) }}%"></div>
                         </div>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="text-center py-4">
+                        <p class="text-ios-caption text-tertiary-ios mb-2">Belum ada budget</p>
+                        <a href="{{ route('budget.index') }}" class="text-ios-caption text-accent-ios">Buat budget pertama</a>
+                    </div>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -208,7 +235,7 @@
                     </svg>
                 </button>
             </div>
-            <form action="#" method="POST">
+            <form action="{{ route('transaksi.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="type" value="income">
                 <div class="modal-body space-y-4">
@@ -226,11 +253,16 @@
                     <div class="form-group">
                         <label for="income_cat" class="form-label">Kategori</label>
                         <select name="category_id" id="income_cat" class="input-ios" required>
-                            <option value="1">💰 Gaji</option>
-                            <option value="2">💵 Bonus</option>
-                            <option value="3">💼 Freelance</option>
-                            <option value="4">📈 Investasi</option>
+                            @foreach($categories ?? [] as $cat)
+                                @if($cat->type === 'income')
+                                <option value="{{ $cat->id }}">{{ $cat->icon }} {{ $cat->name }}</option>
+                                @endif
+                            @endforeach
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="income_date" class="form-label">Tanggal</label>
+                        <input type="date" name="date" id="income_date" class="input-ios" value="{{ date('Y-m-d') }}" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -251,7 +283,7 @@
                     </svg>
                 </button>
             </div>
-            <form action="#" method="POST">
+            <form action="{{ route('transaksi.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="type" value="expense">
                 <div class="modal-body space-y-4">
@@ -269,11 +301,16 @@
                     <div class="form-group">
                         <label for="expense_cat" class="form-label">Kategori</label>
                         <select name="category_id" id="expense_cat" class="input-ios" required>
-                            <option value="5">🍔 Makanan</option>
-                            <option value="6">🚗 Transport</option>
-                            <option value="7">🛒 Belanja</option>
-                            <option value="8">🎮 Hiburan</option>
+                            @foreach($categories ?? [] as $cat)
+                                @if($cat->type === 'expense')
+                                <option value="{{ $cat->id }}">{{ $cat->icon }} {{ $cat->name }}</option>
+                                @endif
+                            @endforeach
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expense_date" class="form-label">Tanggal</label>
+                        <input type="date" name="date" id="expense_date" class="input-ios" value="{{ date('Y-m-d') }}" required>
                     </div>
                 </div>
                 <div class="modal-footer">

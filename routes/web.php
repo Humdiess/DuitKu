@@ -2,45 +2,63 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\ReportController;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Landing Page
 Route::get('/', function () {
     return view('landing');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard.index');
-})->name('dashboard');
+// Guest Routes (not logged in)
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'ShowLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'Login'])->name('login.post');
+    Route::get('/register', [AuthController::class, 'ShowRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'Register'])->name('register.post');
+});
 
-Route::get('/dashboard/transaksi', function () {
-    return view('dashboard.transaksi');
-})->name('transaksi');
+// Authenticated Routes
+Route::middleware('auth')->group(function () {
+    // Logout
+    Route::get('/logout', [AuthController::class, 'Logout'])->name('logout');
 
-Route::get('/dashboard/kategori', function () {
-    return view('dashboard.kategori');
-})->name('kategori');
+    // Dashboard
+    Route::prefix('dashboard')->group(function () {
+        // Main Dashboard
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::get('/dashboard/budget', function () {
-    return view('dashboard.budget');
-})->name('budget');
+        // Transactions (Transaksi)
+        Route::resource('transaksi', TransactionController::class);
+        Route::get('transaksi-filter', [TransactionController::class, 'filter'])->name('transaksi.filter');
 
-Route::get('/dashboard/laporan', function () {
-    return view('dashboard.laporan');
-})->name('laporan');
+        // Categories (Kategori)
+        Route::resource('kategori', CategoryController::class);
+        Route::get('kategori-filter', [CategoryController::class, 'filter'])->name('kategori.filter');
 
-Route::get('/dashboard/pengaturan', function () {
-    return view('dashboard.pengaturan');
-})->name('pengaturan');
+        // Budget
+        Route::resource('budget', BudgetController::class);
 
-Route::get('/dashboard/profil', function () {
-    return view('dashboard.profil');
-})->name('profil');
+        // Reports (Laporan)
+        Route::get('laporan', [ReportController::class, 'index'])->name('laporan');
 
-Route::resource('users', UserController::class);
+        // Settings (Pengaturan)
+        Route::get('pengaturan', function () {
+            return view('dashboard.pengaturan');
+        })->name('pengaturan');
 
-Route::get('/login', [AuthController::class, 'ShowLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'Login'])->name('login.post');
-Route::get('/register', [AuthController::class, 'ShowRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'Register'])->name('register.post');
-Route::get('/logout', [AuthController::class, 'Logout'])->name('logout');
-
+        // Profile (Profil)
+        Route::get('profil', function () {
+            return view('dashboard.profil');
+        })->name('profil');
+    });
+});
