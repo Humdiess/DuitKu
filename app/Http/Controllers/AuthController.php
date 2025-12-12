@@ -30,7 +30,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('ShowLogin')->with('success', 'User created successfully');
+        return redirect()->route('login')->with('success', 'User created successfully');
     }
 
     public function Login(Request $request) {
@@ -40,14 +40,14 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            return redirect()->route('ShowLogin')->with('success', 'Login successful');
+            return redirect()->route('dashboard')->with('success', 'Login successful');
         }
 
-        return redirect()->route('ShowLogin')->with('error', 'Invalid credentials');
+        return redirect()->route('login')->with('error', 'Invalid credentials');
     }
 
     public function Logout() {
         Auth::logout();
-        return redirect()->route('ShowLogin')->with('success', 'Logout successful');
+        return redirect()->route('login')->with('success', 'Logout successful');
     }
 }
