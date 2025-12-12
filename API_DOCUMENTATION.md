@@ -806,3 +806,367 @@ const handleDelete = async (id) => {
 5. **Date Format:** Selalu gunakan format `Y-m-d` (contoh: `2025-12-12`)
 
 6. **Amount:** Kirim sebagai number, tidak perlu format currency
+
+---
+
+## 🎨 Design System - iOS 26 Liquid Glass Theme
+
+### Design Philosophy
+Aplikasi DuitKu menggunakan tema **iOS 26 Liquid Glass** yang menampilkan:
+- **Frosted glass effect** dengan blur dan transparansi
+- **Minimalist & clean UI** dengan spacing yang lega
+- **Soft shadows** dan border halus
+- **Premium feel** dengan gradients dan animasi halus
+- **Dark mode as default** dengan opsi light mode
+
+### Color Palette
+
+#### Dark Mode (Default)
+```javascript
+const darkColors = {
+  // Backgrounds
+  bgBase: '#000000',                    // App background
+  bgElevated: 'rgba(28, 28, 30, 0.8)',  // Cards, modals
+  glassBg: 'rgba(255, 255, 255, 0.08)', // Glass effect
+  glassBgHeavy: 'rgba(255, 255, 255, 0.12)', // Heavier glass
+  
+  // Text
+  textPrimary: '#FFFFFF',
+  textSecondary: 'rgba(255, 255, 255, 0.7)',
+  textTertiary: 'rgba(255, 255, 255, 0.5)',
+  
+  // Accent
+  accentColor: '#0A84FF',      // Primary blue
+  accentSecondary: '#5E5CE6',  // Purple
+  
+  // System Colors
+  systemGreen: '#30D158',   // Income, success
+  systemRed: '#FF453A',     // Expense, error
+  systemOrange: '#FF9F0A',  // Warning
+  
+  // Borders & Fills
+  separator: 'rgba(255, 255, 255, 0.08)',
+  fillPrimary: 'rgba(120, 120, 128, 0.36)',
+  glassBorder: 'rgba(255, 255, 255, 0.1)',
+};
+```
+
+#### Light Mode
+```javascript
+const lightColors = {
+  // Backgrounds
+  bgBase: '#F2F2F7',
+  bgElevated: 'rgba(255, 255, 255, 0.8)',
+  glassBg: 'rgba(255, 255, 255, 0.6)',
+  glassBgHeavy: 'rgba(255, 255, 255, 0.75)',
+  
+  // Text
+  textPrimary: '#000000',
+  textSecondary: 'rgba(0, 0, 0, 0.6)',
+  textTertiary: 'rgba(0, 0, 0, 0.4)',
+  
+  // Accent
+  accentColor: '#007AFF',
+  accentSecondary: '#5856D6',
+  
+  // System Colors
+  systemGreen: '#34C759',
+  systemRed: '#FF3B30',
+  systemOrange: '#FF9500',
+  
+  // Borders & Fills
+  separator: 'rgba(0, 0, 0, 0.08)',
+  fillPrimary: 'rgba(120, 120, 128, 0.2)',
+  glassBorder: 'rgba(0, 0, 0, 0.06)',
+};
+```
+
+### Typography
+
+```javascript
+const typography = {
+  // Font Family - Use system fonts
+  fontFamily: Platform.select({
+    ios: 'System',
+    android: 'Roboto',
+  }),
+  
+  // Sizes
+  title: {
+    fontSize: 32,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+  },
+  headline: {
+    fontSize: 17,
+    fontWeight: '600',
+    letterSpacing: -0.2,
+  },
+  body: {
+    fontSize: 16,
+    fontWeight: '400',
+    letterSpacing: -0.2,
+  },
+  caption: {
+    fontSize: 13,
+    fontWeight: '400',
+    color: 'textTertiary',
+  },
+  stat: {
+    fontSize: 36,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+  },
+};
+```
+
+### Component Styling
+
+#### Glass Card
+```javascript
+const glassCard = {
+  backgroundColor: colors.glassBg,
+  borderRadius: 20,
+  borderWidth: 1,
+  borderColor: colors.glassBorder,
+  padding: 16,
+  // Note: Use expo-blur for blur effect in React Native
+  // Or use react-native-blur
+};
+```
+
+#### Buttons
+```javascript
+// Primary Button
+const primaryButton = {
+  backgroundColor: colors.accentColor,
+  paddingVertical: 14,
+  paddingHorizontal: 24,
+  borderRadius: 14,
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
+// Secondary Button (Glass)
+const secondaryButton = {
+  backgroundColor: colors.glassBg,
+  borderWidth: 1,
+  borderColor: colors.glassBorder,
+  paddingVertical: 14,
+  paddingHorizontal: 24,
+  borderRadius: 14,
+};
+```
+
+#### Input Fields
+```javascript
+const inputField = {
+  backgroundColor: colors.glassBg,
+  borderWidth: 1,
+  borderColor: colors.glassBorder,
+  borderRadius: 14,
+  paddingVertical: 14,
+  paddingHorizontal: 16,
+  fontSize: 16,
+  color: colors.textPrimary,
+};
+
+// Focused state
+const inputFieldFocused = {
+  borderColor: colors.accentColor,
+  // Add shadow/glow effect
+};
+```
+
+### Screen Layouts
+
+#### Dashboard Screen
+```
+┌─────────────────────────────────────┐
+│ [≡]  Dashboard        [🌙] [👤 ▾]  │  ← Navbar
+├─────────────────────────────────────┤
+│                                     │
+│  ┌─────────┐ ┌─────────┐           │  ← Stats Grid
+│  │ Income  │ │ Expense │           │
+│  │ Rp 10jt │ │ Rp 5jt  │           │
+│  │ +15.5%  │ │ -10.2%  │           │
+│  └─────────┘ └─────────┘           │
+│                                     │
+│  ┌─────────┐ ┌─────────┐           │
+│  │ Balance │ │ Trans.  │           │
+│  │ Rp 5jt  │ │   25    │           │
+│  └─────────┘ └─────────┘           │
+│                                     │
+│  ┌─────────────────────────────────┐│  ← Chart Card
+│  │ Grafik Keuangan    [7 Hari ▾]  ││
+│  │                                 ││
+│  │    ░░     ▓▓▓▓                 ││
+│  │   ░░░░   ▓▓▓▓▓▓  ░░░          ││
+│  │  ░░░░░░ ▓▓▓▓▓▓▓▓ ░░░░ ░       ││
+│  │  Sat Sun Mon Tue Wed Thu Fri   ││
+│  └─────────────────────────────────┘│
+│                                     │
+│  ┌─────────────────────────────────┐│  ← Recent Transactions
+│  │ Transaksi Terbaru  [Lihat >]   ││
+│  ├─────────────────────────────────┤│
+│  │ 🍔 Makan siang    - Rp 150.000 ││
+│  │ 💰 Gaji          + Rp 10.000.000│
+│  └─────────────────────────────────┘│
+│                                     │
+│  ┌─────────────────────────────────┐│  ← Budget Overview
+│  │ Quick Actions                  ││
+│  │ [+ Pemasukan] [- Pengeluaran]  ││
+│  └─────────────────────────────────┘│
+│                                     │
+└─────────────────────────────────────┘
+│  🏠    💰    📁    💵    📊  │  ← Bottom Tab
+└─────────────────────────────────────┘
+```
+
+#### Navigation Structure
+```
+📱 App
+├── 🔐 Auth Stack (Unauthenticated)
+│   ├── Login Screen
+│   └── Register Screen
+│
+└── 🏠 Main Tab Navigator (Authenticated)
+    ├── Dashboard Tab
+    │   └── Dashboard Screen
+    │
+    ├── Transaksi Tab
+    │   ├── Transaction List Screen
+    │   ├── Add Transaction Modal
+    │   └── Transaction Detail Screen
+    │
+    ├── Kategori Tab
+    │   ├── Category List Screen
+    │   └── Add/Edit Category Modal
+    │
+    ├── Budget Tab
+    │   ├── Budget List Screen
+    │   └── Add Budget Modal
+    │
+    └── Laporan Tab
+        └── Report Screen (Charts & Stats)
+```
+
+### Icons & Emojis
+Kategori menggunakan emoji sebagai icon:
+- 🍔 Makanan
+- 🚗 Transport
+- 🛒 Belanja
+- 🎮 Hiburan
+- 💊 Kesehatan
+- 📄 Tagihan
+- 💰 Gaji
+- 🎁 Bonus
+- 💼 Freelance
+- 📈 Investasi
+
+### Animations & Transitions
+- **Fade in** untuk loading content
+- **Scale on press** untuk buttons (0.98 scale)
+- **Smooth transitions** untuk theme switching
+- **Pull to refresh** untuk lists
+- **Skeleton loading** untuk data fetching
+
+### Best Practices untuk React Native
+
+1. **Use Expo** untuk kemudahan development
+2. **expo-blur** atau **@react-native-community/blur** untuk glassmorphism
+3. **expo-linear-gradient** untuk gradient backgrounds
+4. **react-native-reanimated** untuk animasi smooth
+5. **nativewind** atau **styled-components** untuk styling
+6. **react-query** atau **SWR** untuk data fetching/caching
+7. **zustand** atau **context** untuk state management
+
+### Example Theme Context (React Native)
+```javascript
+// contexts/ThemeContext.js
+import React, { createContext, useState, useContext } from 'react';
+
+const ThemeContext = createContext();
+
+export const themes = {
+  dark: {
+    bgBase: '#000000',
+    bgElevated: 'rgba(28, 28, 30, 0.8)',
+    glassBg: 'rgba(255, 255, 255, 0.08)',
+    textPrimary: '#FFFFFF',
+    textSecondary: 'rgba(255, 255, 255, 0.7)',
+    accentColor: '#0A84FF',
+    systemGreen: '#30D158',
+    systemRed: '#FF453A',
+    // ... more colors
+  },
+  light: {
+    bgBase: '#F2F2F7',
+    bgElevated: 'rgba(255, 255, 255, 0.8)',
+    glassBg: 'rgba(255, 255, 255, 0.6)',
+    textPrimary: '#000000',
+    textSecondary: 'rgba(0, 0, 0, 0.6)',
+    accentColor: '#007AFF',
+    systemGreen: '#34C759',
+    systemRed: '#FF3B30',
+    // ... more colors
+  },
+};
+
+export function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState('dark');
+  
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+  
+  return (
+    <ThemeContext.Provider value={{ 
+      theme, 
+      colors: themes[theme], 
+      toggleTheme 
+    }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export const useTheme = () => useContext(ThemeContext);
+```
+
+### Currency Formatting
+```javascript
+// utils/currency.js
+export const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+// Usage: formatCurrency(1500000) => "Rp 1.500.000"
+```
+
+### Date Formatting
+```javascript
+// utils/date.js
+import { format, formatDistanceToNow } from 'date-fns';
+import { id } from 'date-fns/locale';
+
+export const formatDate = (date) => {
+  return format(new Date(date), 'd MMM yyyy', { locale: id });
+};
+
+export const formatRelativeDate = (date) => {
+  return formatDistanceToNow(new Date(date), { 
+    addSuffix: true, 
+    locale: id 
+  });
+};
+
+// Usage: 
+// formatDate('2025-12-12') => "12 Des 2025"
+// formatRelativeDate('2025-12-12') => "2 hari yang lalu"
+```
